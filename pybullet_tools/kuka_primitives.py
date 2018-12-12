@@ -151,10 +151,12 @@ class Command(object):
                 #print(msg)
                 #wait_for_interrupt()
 
-    def execute(self, time_step=0.05):
+    def execute(self, time_step=0.05, callback=None):
         for i, body_path in enumerate(self.body_paths):
             for j in body_path.iterator():
                 #time.sleep(time_step)
+                if callback is not None:
+                    callback()
                 wait_for_duration(time_step)
 
     def control(self, real_time=False, dt=0): # TODO: real_time
