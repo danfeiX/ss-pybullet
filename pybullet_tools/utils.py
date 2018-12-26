@@ -49,6 +49,7 @@ HUSKY_URDF = "husky/husky.urdf"
 # Objects
 KIVA_SHELF_SDF = "kiva_shelf/model.sdf"
 SMALL_BLOCK_URDF = "models/drake/objects/block_for_pick_and_place.urdf"
+BLOCK1_URDF = "models/drake/objects/black_box.urdf"
 BLOCK_URDF = "models/drake/objects/block_for_pick_and_place_mid_size.urdf"
 SINK_URDF = 'models/sink.urdf'
 STOVE_URDF = 'models/stove.urdf'
@@ -1908,7 +1909,7 @@ def is_center_stable(body, surface, epsilon=1e-2):
 
 
 def sample_placement(top_body, bottom_body, top_pose=unit_pose(), bottom_link=None,
-                     percent=1.0, max_attempts=50, epsilon=1e-3):
+                     percent=0.5, max_attempts=50, epsilon=1e-3):
     # TODO: transform into the coordinate system of the bottom
     # TODO: maybe I should instead just require that already in correct frame
     bottom_aabb = get_lower_upper(bottom_body, link=bottom_link)
