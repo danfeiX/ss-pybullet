@@ -132,8 +132,9 @@ class Detach(ApplyForce):
         return Attach(self.body, self.robot, self.link)
 
 class Command(object):
-    def __init__(self, body_paths):
+    def __init__(self, body_paths, args=[]):
         self.body_paths = body_paths
+        self._args = args
 
     # def full_path(self, q0=None):
     #     if q0 is None:
@@ -142,6 +143,10 @@ class Command(object):
     #     for partial_path in self.body_paths:
     #         new_path += partial_path.full_path(new_path[-1])[1:]
     #     return new_path
+
+    @property
+    def args(self):
+        return self._args
 
     def step(self):
         for i, body_path in enumerate(self.body_paths):
