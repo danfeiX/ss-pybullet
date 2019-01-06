@@ -82,7 +82,7 @@ class BodyPath(object):
             set_joint_positions(self.body, self.joints, configuration)
             for grasp in self.attachments:
                 grasp.assign()
-            yield i
+            yield i, configuration
     def control(self, real_time=False, dt=0):
         # TODO: just waypoints
         if real_time:
@@ -148,6 +148,10 @@ class Command(object):
     def args(self):
         return self._args
 
+    def step_iter(self):
+        for i, body_path in enumerate(self.body_paths):
+            return body_path.iterator()
+
     def step(self):
         for i, body_path in enumerate(self.body_paths):
             for j in body_path.iterator():
@@ -158,7 +162,7 @@ class Command(object):
 
     def execute(self, time_step=0.05, callback=None):
         for i, body_path in enumerate(self.body_paths):
-            for j in body_path.iterator():
+            for j, conf in body_path.iterator():
                 #time.sleep(time_step)
                 if callback is not None:
                     callback()
