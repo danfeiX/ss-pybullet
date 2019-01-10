@@ -97,7 +97,12 @@ class Camera(object):
         return width, height, rgb[:, :, :3], depth_map, obj_idmap, link_idmap
 
 
-def bbox2d_from_mask(bmask):
+def get_bbox2d_from_mask(bmask):
+    """
+    Get 2d bbox from a binary segmentation mask
+    :param bmask: binary segmentation mask
+    :return:
+    """
     box = np.zeros(4, dtype=np.int64)
     coords_r, coords_c = np.where(bmask > 0)
     box[0] = coords_r.min()
@@ -108,6 +113,11 @@ def bbox2d_from_mask(bmask):
 
 
 def union_boxes(boxes):
+    """
+    Union a list of boxes
+    :param boxes: [N, 4] boxes
+    :return:
+    """
     assert(isinstance(boxes, (tuple, list)))
     boxes = np.vstack(boxes)
     new_box = boxes[0].copy()
@@ -118,16 +128,26 @@ def union_boxes(boxes):
     return new_box
 
 
-def get_bbox2d(obj_idmap):
-    id_range = obj_idmap.max() + 1
+def get_bbox2d_from_segmentation(seg_map):
+    """
+    Get 2D bbox from a semantic segmentation map
+    :param seg_map:
+    :return:
+    """
+    id_range = seg_map.max() + 1
     all_bboxes = np.zeros([id_range, 5], dtype=np.int64)
     for i in range(id_range):
         all_bboxes[i, 0] = i
-        all_bboxes[i, 1:] = bbox2d_from_mask(obj_idmap == i)
+        all_bboxes[i, 1:] = get_bbox2d_from_mask(seg_map == i)
     return all_bboxes
 
 
 def box_rc_to_xy(box):
+    """
+    box coordinate from (r1, c1, r2, c2) to (x1, y1, x2, y2)
+    :param box: a
+    :return: box
+    """
     return np.array([box[1], box[0], box[3], box[2]], dtype=box.dtype)
 
 
@@ -138,7 +158,7 @@ def draw_boxes(image, boxes, color, labels=None):
     image = Image.fromarray(image.copy())
     draw = ImageDraw.Draw(image)
     for b in boxes:
-        draw.rectangle(box_rc_to_xy(b).tolist(), fill='black')
+        draw.rectangle(box_rc_to_xy(b).tolist(), outline='green')
     return np.array(image)
 
 
@@ -150,7 +170,7 @@ def main():
     c = Camera(480, 640)
     c.set_pose_ypr([0, 0, 0], 5, 45, -45)
     w, h, rgb, depth, obj, link = c.capture_frame()
-    boxes = get_bbox2d(obj)
+    boxes = get_bbox2d_from_segmentation(obj)
     vis = draw_boxes(rgb, boxes[:, 1:], None)
     import matplotlib.pyplot as plt
     plt.imshow(vis); plt.show()
