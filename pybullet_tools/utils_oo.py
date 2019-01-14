@@ -401,6 +401,10 @@ class Body(Entity):
         return cls(pe, uid, name, boundary, scale)
 
     @property
+    def name(self):
+        return self._name
+
+    @property
     def boundary(self):
         return self._boundary
 
