@@ -186,6 +186,10 @@ class BulletPhysicsEngine(object):
         p.resetBasePositionAndOrientation(body, list(pos), quat)
 
     @staticmethod
+    def set_body_pose(body, pose):
+        p.resetBasePositionAndOrientation(body, pose[0], pose[1])
+
+    @staticmethod
     def set_body_quat(body, quat):
         pos, _ = p.getBasePositionAndOrientation(body)
         p.resetBasePositionAndOrientation(body, pos, list(quat))
