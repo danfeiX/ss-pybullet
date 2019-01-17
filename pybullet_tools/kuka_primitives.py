@@ -211,7 +211,9 @@ def get_ik_fn(robot, fixed=[], teleport=False, num_attempts=10):
     sample_fn = get_sample_fn(robot, movable_joints)
     def fn(body, pose, grasp):
         obstacles = [body] + fixed
+        # get gripper pose in world frame
         gripper_pose = end_effector_from_body(pose.pose, grasp.grasp_pose)
+        # get approach pose in world frame
         approach_pose = approach_from_grasp(grasp.approach_pose, gripper_pose)
         for _ in range(num_attempts):
             set_joint_positions(robot, movable_joints, sample_fn()) # Random seed
