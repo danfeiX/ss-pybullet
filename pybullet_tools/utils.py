@@ -133,6 +133,7 @@ class HideOutput(object):
         sys.stdout = self._origstdout
         sys.stdout.flush()
         os.dup2(self._oldstdout_fno, 1)
+        os.close(self._oldstdout_fno)
 
 #####################################
 
