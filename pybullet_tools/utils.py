@@ -11,7 +11,6 @@ import time
 
 from collections import defaultdict, deque, namedtuple
 from itertools import product, combinations, count
-
 from .transformations import quaternion_from_matrix, quaternion_slerp, unit_vector
 
 directory = os.path.dirname(os.path.abspath(__file__))
