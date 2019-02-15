@@ -15,6 +15,8 @@ GRASP_INFO = {
 }
 TOOL_FRAMES = {
     'iiwa14': 'iiwa_link_ee_kuka', # iiwa_link_ee
+    'cube_gripper': 'ee_link',
+    'wsg50_with_gripper': 'base_link',
 }
 
 DEBUG_FAILURE = False
@@ -79,9 +81,11 @@ class BodyPath(object):
         # TODO: compute and cache these
         # TODO: compute bounding boxes as well
         for i, configuration in enumerate(self.path):
+            enable_gravity()
             set_joint_positions(self.body, self.joints, configuration)
             for grasp in self.attachments:
                 grasp.assign()
+            step_simulation()
             yield i, configuration
     def control(self, real_time=False, dt=0):
         # TODO: just waypoints

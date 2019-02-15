@@ -2,7 +2,7 @@
 <robot name="cube_gripper">
   <link name="world"/>
   <joint name="txj" type="prismatic">
-    <limit lower="-0.5" upper="0.5"/>
+    <limit lower="-1.0" upper="1.0"/>
     <origin rpy="0 0 0" xyz="0 0 0"/>
     <axis xyz="1 0 0"/>
     <parent link="world"/>
@@ -10,14 +10,14 @@
   </joint>
   <link name="ty"/>
   <joint name="tyj" type="prismatic">
-    <limit lower="-0.5" upper="0.5"/>
+    <limit lower="-1.0" upper="1.0"/>
     <axis xyz="0 1 0"/>
     <parent link="ty"/>
     <child link="tz"/>
   </joint>
   <link name="tz"/>
   <joint name="tzj" type="prismatic">
-    <limit lower="-1.5" upper="0.5"/>
+    <limit lower="0" upper="2.0"/>
     <axis xyz="0 0 1"/>
     <parent link="tz"/>
     <child link="rx"/>

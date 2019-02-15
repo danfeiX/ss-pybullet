@@ -75,7 +75,7 @@
     </collision>
 
     <inertial>
-      <mass value="2."/>  <!-- mr^2 = 0.5*0.12^2 = 0.0072 for Z axis, lighter along other axis -->
+      <mass value="0.001"/>  <!-- mr^2 = 0.5*0.12^2 = 0.0072 for Z axis, lighter along other axis -->
       <inertia ixx="0.005" iyy="0.005" izz="0.0072"/>
     </inertial>
   </link>
