@@ -202,7 +202,8 @@ def get_stable_gen(fixed=[]): # TODO: continuous set of grasps
     def gen(body, surface):
         while True:
             pose = sample_placement(body, surface)
-            if (pose is None) or any(pairwise_collision(body, b) for b in fixed):
+            obstacles = [f for f in fixed if f != body]
+            if (pose is None) or any(pairwise_collision(body, b) for b in obstacles):
                 continue
             body_pose = BodyPose(body, pose)
             yield (body_pose,)
@@ -284,7 +285,8 @@ def get_holding_motion_gen(robot, fixed=[], teleport=False):
             path = [conf1.configuration, conf2.configuration]
         else:
             conf1.assign()
-            obstacles = fixed + assign_fluent_state(fluents)
+            obstacles = [f for f in fixed if f != body]
+            obstacles += assign_fluent_state(fluents)
             path = plan_joint_motion(robot, conf2.joints, conf2.configuration,
                                      obstacles=obstacles, attachments=[grasp.attachment()])
             if path is None:

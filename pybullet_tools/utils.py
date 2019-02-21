@@ -468,7 +468,7 @@ def get_image(width=640, height=480):
     return rgb # np.reshape(rgb, [width, height, 4])
 
 def set_default_camera():
-    set_camera(160, -35, 2.5, Point())
+    set_camera(90, -35, 1.5, Point())
 
 def save_state():
     return p.saveState(physicsClientId=CLIENT)
@@ -1911,7 +1911,7 @@ def is_center_stable(body, surface, epsilon=1e-2):
 
 
 def sample_placement(top_body, bottom_body, top_pose=unit_pose(), bottom_link=None,
-                     percent=1.2, max_attempts=50, epsilon=1e-3):
+                     percent=0.3, max_attempts=50, epsilon=1e-3):
     # TODO: transform into the coordinate system of the bottom
     # TODO: maybe I should instead just require that already in correct frame
     bottom_aabb = get_lower_upper(bottom_body, link=bottom_link)
