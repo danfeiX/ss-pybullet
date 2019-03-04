@@ -245,19 +245,19 @@ def get_model_path(rel_path): # TODO: add to search path
     directory = os.path.dirname(os.path.abspath(__file__))
     return os.path.join(directory, '..', rel_path)
 
-def load_model(rel_path, pose=None, fixed_base=True):
+def load_model(rel_path, pose=None, fixed_base=True, **kwargs):
     # TODO: error with loadURDF when loading MESH visual and CYLINDER collision
     abs_path = get_model_path(rel_path)
     flags = 0 # by default, Bullet disables self-collision
     add_data_path()
     if abs_path.endswith('.urdf'):
-        body = p.loadURDF(abs_path, useFixedBase=fixed_base, flags=flags, physicsClientId=CLIENT)
+        body = p.loadURDF(abs_path, useFixedBase=fixed_base, flags=flags, physicsClientId=CLIENT, **kwargs)
     elif abs_path.endswith('.sdf'):
-        body = p.loadSDF(abs_path, physicsClientId=CLIENT)
+        body = p.loadSDF(abs_path, physicsClientId=CLIENT, **kwargs)
     elif abs_path.endswith('.xml'):
-        body = p.loadMJCF(abs_path, physicsClientId=CLIENT)
+        body = p.loadMJCF(abs_path, physicsClientId=CLIENT, **kwargs)
     elif abs_path.endswith('.bullet'):
-        body = p.loadBullet(abs_path, physicsClientId=CLIENT)
+        body = p.loadBullet(abs_path, physicsClientId=CLIENT, **kwargs)
     else:
         raise ValueError(abs_path)
     if pose is not None:
