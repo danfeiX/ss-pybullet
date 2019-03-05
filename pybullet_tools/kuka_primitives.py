@@ -8,6 +8,8 @@ from .utils import get_pose, set_pose, get_movable_joints, get_configuration, \
     inverse_kinematics, pairwise_collision, remove_fixed_constraint, Attachment, get_sample_fn, \
     step_simulation, refine_path, plan_direct_joint_motion
 
+SIMULATE_STEP = False
+
 GRASP_INFO = {
     'top': GraspInfo(lambda body: get_top_grasps(body, under=True, tool_pose=Pose(),
                                                  max_width=INF,  grasp_length=0),
@@ -85,7 +87,8 @@ class BodyPath(object):
             set_joint_positions(self.body, self.joints, configuration)
             for grasp in self.attachments:
                 grasp.assign()
-            step_simulation()
+            if SIMULATE_STEP:
+                step_simulation()
             yield i, configuration
     def control(self, real_time=False, dt=0):
         # TODO: just waypoints
