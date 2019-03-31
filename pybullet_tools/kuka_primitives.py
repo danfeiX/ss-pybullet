@@ -96,12 +96,16 @@ class BodyPath(object):
             enable_real_time()
         else:
             disable_real_time()
+        current_conf = None
         for values in self.path:
-            for _ in joint_controller(self.body, self.joints, values):
+            for conf in joint_controller(self.body, self.joints, values):
                 enable_gravity()
                 if not real_time:
                     step_simulation()
                 time.sleep(dt)
+                current_conf = conf
+        return current_conf
+
     # def full_path(self, q0=None):
     #     # TODO: could produce sequence of savers
     def refine(self, num_steps=0):
@@ -157,7 +161,8 @@ class Command(object):
 
     def step_iter(self):
         for i, body_path in enumerate(self.body_paths):
-            return body_path.iterator()
+            for step_i, conf in body_path.iterator():
+                yield conf
 
     def step(self):
         for i, body_path in enumerate(self.body_paths):
@@ -168,12 +173,15 @@ class Command(object):
                 #wait_for_interrupt()
 
     def execute(self, time_step=0.05, callback=None):
+        current_conf = None
         for i, body_path in enumerate(self.body_paths):
             for j, conf in body_path.iterator():
                 #time.sleep(time_step)
                 if callback is not None:
                     callback()
                 wait_for_duration(time_step)
+                current_conf = conf
+        return current_conf
 
     def control(self, real_time=False, dt=0): # TODO: real_time
         for body_path in self.body_paths:
