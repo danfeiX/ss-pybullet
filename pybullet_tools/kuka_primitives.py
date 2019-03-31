@@ -222,7 +222,7 @@ def get_stable_gen(fixed=[]): # TODO: continuous set of grasps
     return gen
 
 
-def get_ik_fn(robot, fixed=[], teleport=False, num_attempts=10):
+def get_ik_fn(robot, fixed=[], teleport=False, num_attempts=10, resolutions=None):
     movable_joints = get_movable_joints(robot)
     sample_fn = get_sample_fn(robot, movable_joints)
     def fn(body, pose, grasp):
@@ -248,7 +248,8 @@ def get_ik_fn(robot, fixed=[], teleport=False, num_attempts=10):
                 #direction, _ = grasp.approach_pose
                 #path = workspace_trajectory(robot, grasp.link, point_from_pose(approach_pose), -direction,
                 #                                   quat_from_pose(approach_pose))
-                path = plan_direct_joint_motion(robot, conf.joints, q_grasp, obstacles=obstacles)
+                path = plan_direct_joint_motion(
+                    robot, conf.joints, q_grasp, obstacles=obstacles, resolutions=resolutions)
                 if path is None:
                     if DEBUG_FAILURE: user_input('Approach motion failed')
                     continue
@@ -272,7 +273,8 @@ def assign_fluent_state(fluents):
             raise ValueError(name)
     return obstacles
 
-def get_free_motion_gen(robot, fixed=[], teleport=False):
+
+def get_free_motion_gen(robot, fixed=[], teleport=False, resolutions=None):
     def fn(conf1, conf2, fluents=[]):
         assert ((conf1.body == conf2.body) and (conf1.joints == conf2.joints))
         if teleport:
@@ -280,7 +282,8 @@ def get_free_motion_gen(robot, fixed=[], teleport=False):
         else:
             conf1.assign()
             obstacles = fixed + assign_fluent_state(fluents)
-            path = plan_joint_motion(robot, conf2.joints, conf2.configuration, obstacles=obstacles)
+            path = plan_joint_motion(
+                robot, conf2.joints, conf2.configuration, obstacles=obstacles, resolutions=resolutions)
             if path is None:
                 if DEBUG_FAILURE: user_input('Free motion failed')
                 return None
@@ -289,7 +292,7 @@ def get_free_motion_gen(robot, fixed=[], teleport=False):
     return fn
 
 
-def get_holding_motion_gen(robot, fixed=[], teleport=False):
+def get_holding_motion_gen(robot, fixed=[], teleport=False, resolutions=None):
     def fn(conf1, conf2, body, grasp, fluents=[]):
         assert ((conf1.body == conf2.body) and (conf1.joints == conf2.joints))
         if teleport:
@@ -299,7 +302,8 @@ def get_holding_motion_gen(robot, fixed=[], teleport=False):
             obstacles = [f for f in fixed if f != body]
             obstacles += assign_fluent_state(fluents)
             path = plan_joint_motion(robot, conf2.joints, conf2.configuration,
-                                     obstacles=obstacles, attachments=[grasp.attachment()])
+                                     obstacles=obstacles, attachments=[grasp.attachment()],
+                                     resolutions=resolutions)
             if path is None:
                 if DEBUG_FAILURE: user_input('Holding motion failed')
                 return None

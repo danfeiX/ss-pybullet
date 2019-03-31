@@ -1763,8 +1763,9 @@ def get_collision_fn(body, joints, obstacles, attachments, self_collisions, disa
     return collision_fn
 
 def plan_waypoints_joint_motion(body, joints, waypoints, obstacles=None, attachments=[],
-                      self_collisions=True, disabled_collisions=set(), custom_limits={}, max_distance=MAX_DISTANCE):
-    extend_fn = get_extend_fn(body, joints)
+                                self_collisions=True, disabled_collisions=set(), custom_limits={},
+                                max_distance=MAX_DISTANCE, resolutions=None):
+    extend_fn = get_extend_fn(body, joints, resolutions=resolutions)
     collision_fn = get_collision_fn(body, joints, obstacles, attachments, self_collisions, disabled_collisions,
                                     custom_limits=custom_limits, max_distance=max_distance)
     start_conf = get_joint_positions(body, joints)
