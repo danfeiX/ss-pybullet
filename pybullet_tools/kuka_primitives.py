@@ -226,6 +226,13 @@ def get_ik_fn(robot, fixed=[], teleport=False, num_attempts=10, resolutions=None
     movable_joints = get_movable_joints(robot)
     sample_fn = get_sample_fn(robot, movable_joints)
     def fn(body, pose, grasp):
+        """
+        Solves IK for a grasping-like motion
+        :param body: body to be grasped
+        :param pose: pose of the target body
+        :param grasp: grasping pose in the target's frame
+        :return: joint trajectory for a grasping motion
+        """
         obstacles = [body] + fixed
         # get gripper pose in world frame
         gripper_pose = end_effector_from_body(pose.pose, grasp.grasp_pose)
