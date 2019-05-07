@@ -357,10 +357,10 @@ def wait_for_interrupt(max_time=np.inf):
 #         # https://docs.python.org/2/library/select.html
 
 
-def connect(use_gui=True, shadows=True):
+def connect(use_gui=True, shadows=True, options=''):
     method = p.GUI if use_gui else p.DIRECT
     with HideOutput():
-        sim_id = p.connect(method)
+        sim_id = p.connect(method, options=options)
         #sim_id = p.connect(p.GUI, options="--opengl2") if use_gui else p.connect(p.DIRECT)
     if use_gui:
         p.configureDebugVisualizer(p.COV_ENABLE_GUI, False, physicsClientId=sim_id)
