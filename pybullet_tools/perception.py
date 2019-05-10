@@ -82,19 +82,25 @@ class Camera(object):
         )
 
     def capture_raw(self):
-        return p.getCameraImage(
+        width, height, rgb, depth, seg = p.getCameraImage(
             self._width,
             self._height,
             list(self._view_matrix),
             list(self._projection_matrix),
             renderer=p.ER_TINY_RENDERER
         )
+        assert(width == self._width)
+        assert(height == self._height)
+        rgb = np.reshape(rgb, (height, width, 4))
+        depth = np.reshape(depth, (height, width))
+        seg = np.reshape(seg, (height, width))
+        return rgb, depth, seg
 
     def capture_frame(self):
-        width, height, rgb, depth, seg = self.capture_raw()
+        rgb, depth, seg = self.capture_raw()
         obj_idmap, link_idmap = get_segmentation_mask_object_and_link_index(seg)
         depth_map = get_depth_map(depth, near=self._near, far=self._far)
-        return width, height, rgb[:, :, :3], depth_map, obj_idmap, link_idmap
+        return rgb[:, :, :3], depth_map, obj_idmap, link_idmap
 
 
 def get_bbox2d_from_mask(bmask):
@@ -169,7 +175,7 @@ def main():
     id = p.loadURDF("../models/cup.urdf", [1, 1, 0], globalScaling=10.0)
     c = Camera(480, 640)
     c.set_pose_ypr([0, 0, 0], 5, 45, -45)
-    w, h, rgb, depth, obj, link = c.capture_frame()
+    rgb, depth, obj, link = c.capture_frame()
     boxes = get_bbox2d_from_segmentation(obj)
     vis = draw_boxes(rgb, boxes[:, 1:], None)
     import matplotlib.pyplot as plt
