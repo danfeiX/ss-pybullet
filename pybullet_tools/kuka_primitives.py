@@ -8,7 +8,7 @@ from .utils import get_pose, set_pose, get_movable_joints, get_configuration, \
     inverse_kinematics, pairwise_collision, remove_fixed_constraint, Attachment, get_sample_fn, \
     step_simulation, refine_path, plan_direct_joint_motion, center_placement
 
-SIMULATE_STEP = True
+PHYSICS = False
 
 GRASP_INFO = {
     'top': GraspInfo(lambda body: get_top_grasps(body, under=True, tool_pose=Pose(),
@@ -87,7 +87,7 @@ class BodyPath(object):
             set_joint_positions(self.body, self.joints, configuration)
             for grasp in self.attachments:
                 grasp.assign()
-            if SIMULATE_STEP:
+            if PHYSICS:
                 step_simulation()
             yield i, configuration
     def control(self, real_time=False, dt=0):
@@ -209,10 +209,10 @@ def get_grasp_gen(robot, grasp_name):
     return gen
 
 
-def get_stable_gen(fixed=[]): # TODO: continuous set of grasps
+def get_stable_gen(fixed=[], bottom_percent=0.0): # TODO: continuous set of grasps
     def gen(body, surface):
         while True:
-            pose = center_placement(body, surface, bottom_percent=0.3)
+            pose = center_placement(body, surface, bottom_percent=bottom_percent)
             obstacles = [f for f in fixed if f != body]
             if (pose is None) or any(pairwise_collision(body, b) for b in obstacles):
                 continue
