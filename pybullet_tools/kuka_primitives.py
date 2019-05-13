@@ -212,11 +212,11 @@ def get_grasp_gen(robot, grasp_name):
 def get_stable_gen(fixed=[], bottom_percent=0.0): # TODO: continuous set of grasps
     def gen(body, surface):
         while True:
-            # pose = center_placement(body, surface, bottom_percent=bottom_percent)
             obstacles = [f for f in fixed if f != body]
+            # pose = center_placement(body, surface, bottom_percent=bottom_percent)
             pose = sample_center_placement(body, surface, obstacles)
             assert(pose is not None)
-            if (pose is None) or any(pairwise_collision(body, b) for b in obstacles):
+            if any(pairwise_collision(body, b) for b in obstacles):
                 continue
             body_pose = BodyPose(body, pose)
             yield (body_pose,)
