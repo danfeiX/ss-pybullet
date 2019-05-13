@@ -6,7 +6,7 @@ from .utils import get_pose, set_pose, get_movable_joints, get_configuration, \
     enable_gravity, get_refine_fn, user_input, wait_for_duration, link_from_name, get_body_name, sample_placement, \
     end_effector_from_body, approach_from_grasp, plan_joint_motion, GraspInfo, Pose, INF, Point, \
     inverse_kinematics, pairwise_collision, remove_fixed_constraint, Attachment, get_sample_fn, \
-    step_simulation, refine_path, plan_direct_joint_motion, center_placement
+    step_simulation, refine_path, plan_direct_joint_motion, center_placement, sample_center_placement
 
 PHYSICS = False
 
@@ -212,8 +212,10 @@ def get_grasp_gen(robot, grasp_name):
 def get_stable_gen(fixed=[], bottom_percent=0.0): # TODO: continuous set of grasps
     def gen(body, surface):
         while True:
-            pose = center_placement(body, surface, bottom_percent=bottom_percent)
+            # pose = center_placement(body, surface, bottom_percent=bottom_percent)
             obstacles = [f for f in fixed if f != body]
+            pose = sample_center_placement(body, surface, obstacles)
+            assert(pose is not None)
             if (pose is None) or any(pairwise_collision(body, b) for b in obstacles):
                 continue
             body_pose = BodyPose(body, pose)

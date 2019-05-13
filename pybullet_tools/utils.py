@@ -1954,6 +1954,38 @@ def center_placement(top_body, bottom_body, top_pose=unit_pose(), bottom_link=No
     set_pose(top_body, pose)
     return pose
 
+
+def sample_center_placement(top_body, bottom_body, obstacles, top_pose=unit_pose(), bottom_link=None, num_radius=10,
+                            epsilon=1e-3, max_attempts=100):
+    bottom_aabb = get_lower_upper(bottom_body, link=bottom_link)
+    radius_inc = 1 / float(num_radius)
+
+    for ri in range(1, num_radius + 1):
+        for _ in range(max_attempts // num_radius):
+            theta = np.random.uniform(*CIRCULAR_LIMITS)
+            rotation = Euler(yaw=theta)
+            set_pose(top_body, multiply(Pose(euler=rotation), top_pose))
+            center, extent = get_center_extent(top_body)  # center and size of top body
+            # bottom_aabb are diagonal corners.
+            # lower and upper are limits for the placement center such that the entire
+            # top body is inside the footprint of the bottom body
+            # if percent = 1 and top body is same size as bottom, lower=upper=center
+            lower = (np.array(bottom_aabb[0]))[:2]
+            upper = (np.array(bottom_aabb[1]))[:2]
+            sample_center = (lower + upper) / 2
+            sample_range = (upper - lower) * radius_inc * float(ri) / 2
+            if np.greater(lower, upper).any():
+                continue
+            x, y = np.random.uniform(sample_center - sample_range, sample_center + sample_range)
+            z = (bottom_aabb[1] + extent/2.)[2] + epsilon
+            point = np.array([x, y, z]) + (get_point(top_body) - center)
+            pose = multiply(Pose(point, rotation), top_pose)
+            set_pose(top_body, pose)
+            if any(pairwise_collision(top_body, b) for b in obstacles):
+                continue
+            return pose
+    return None
+
 #####################################
 
 # Reachability
