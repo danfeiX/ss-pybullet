@@ -1938,6 +1938,34 @@ def sample_placement(top_body, bottom_body, top_pose=unit_pose(), bottom_link=No
     return None
 
 
+def sample_placement_region(top_body, bottom_body, region, top_pose=unit_pose(), bottom_link=None,
+                            percent=0.3, max_attempts=50, epsilon=1e-3):
+    # TODO: transform into the coordinate system of the bottom
+    # TODO: maybe I should instead just require that already in correct frame
+    bottom_aabb = get_lower_upper(bottom_body, link=bottom_link)
+    bottom_center = (np.array(bottom_aabb[0]) + np.array(bottom_aabb[1]))[:2] / 2
+    for _ in range(max_attempts):
+        theta = np.random.uniform(*CIRCULAR_LIMITS)
+        rotation = Euler(yaw=theta)
+        set_pose(top_body, multiply(Pose(euler=rotation), top_pose))
+        center, extent = get_center_extent(top_body)  # center and size of top body
+        # bottom_aabb are diagonal corners.
+        # lower and upper are limits for the placement center such that the entire
+        # top body is inside the footprint of the bottom body
+        # if percent = 1 and top body is same size as bottom, lower=upper=center
+        lower = (np.array(bottom_center + region[0]) + percent*extent[:2]/2)
+        upper = (np.array(bottom_center + region[1]) - percent*extent[:2]/2)
+        if np.greater(lower, upper).any():
+            continue
+        x, y = np.random.uniform(lower, upper)
+        z = (bottom_aabb[1] + extent/2.)[2] + epsilon
+        point = np.array([x, y, z]) + (get_point(top_body) - center)
+        pose = multiply(Pose(point, rotation), top_pose)
+        set_pose(top_body, pose)
+        return pose
+    return None
+
+
 def center_placement(top_body, bottom_body, top_pose=unit_pose(), bottom_link=None, bottom_percent=0.0,
                      epsilon=1e-3):
     bottom_aabb = get_lower_upper(bottom_body, link=bottom_link)
