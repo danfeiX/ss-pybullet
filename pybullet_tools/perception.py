@@ -1,5 +1,6 @@
 import pybullet as p
 import numpy as np
+from PIL import Image, ImageDraw
 
 
 def capture_raw(height, width, **kwargs):
@@ -100,7 +101,7 @@ class Camera(object):
         rgb, depth, seg = self.capture_raw()
         obj_idmap, link_idmap = get_segmentation_mask_object_and_link_index(seg)
         depth_map = get_depth_map(depth, near=self._near, far=self._far)
-        return rgb[:, :, :3], depth_map, obj_idmap, link_idmap
+        return rgb[:, :, :3].astype(np.uint8), depth_map, obj_idmap, link_idmap
 
 
 def get_bbox2d_from_mask(bmask):
@@ -111,6 +112,9 @@ def get_bbox2d_from_mask(bmask):
     """
     box = np.zeros(4, dtype=np.int64)
     coords_r, coords_c = np.where(bmask > 0)
+    if len(coords_r) == 0:
+        print('WARNING: empty bbox')
+        return box
     box[0] = coords_r.min()
     box[1] = coords_c.min()
     box[2] = coords_r.max()
@@ -134,17 +138,16 @@ def union_boxes(boxes):
     return new_box
 
 
-def get_bbox2d_from_segmentation(seg_map):
+def get_bbox2d_from_segmentation(seg_map, object_ids):
     """
     Get 2D bbox from a semantic segmentation map
     :param seg_map:
     :return:
     """
-    id_range = seg_map.max() + 1
-    all_bboxes = np.zeros([id_range, 5], dtype=np.int64)
-    for i in range(id_range):
-        all_bboxes[i, 0] = i
-        all_bboxes[i, 1:] = get_bbox2d_from_mask(seg_map == i)
+    all_bboxes = np.zeros([len(object_ids), 5], dtype=np.int64)
+    for i in range(len(object_ids)):
+        all_bboxes[i, 0] = object_ids[i]
+        all_bboxes[i, 1:] = get_bbox2d_from_mask(seg_map == object_ids[i])
     return all_bboxes
 
 
@@ -157,8 +160,7 @@ def box_rc_to_xy(box):
     return np.array([box[1], box[0], box[3], box[2]], dtype=box.dtype)
 
 
-def draw_boxes(image, boxes, color, labels=None):
-    from PIL import Image, ImageDraw
+def draw_boxes(image, boxes, labels=None):
     if labels is not None:
         assert(len(labels) == len(boxes))
     image = Image.fromarray(image.copy())
@@ -166,6 +168,21 @@ def draw_boxes(image, boxes, color, labels=None):
     for b in boxes:
         draw.rectangle(box_rc_to_xy(b).tolist(), outline='green')
     return np.array(image)
+
+
+def crop_pad_resize(images, bbox, target_size, expand_ratio=1.0):
+    crops = np.zeros((bbox.shape[0], target_size, target_size, 3), dtype=images.dtype)
+    im_pil = Image.fromarray(images.copy())
+    for i, box in enumerate(bbox):
+        if np.all(box == 0):
+            continue
+        box_center = [(box[0] + box[2]) / 2, (box[1] + box[3]) / 2]
+        box_size = [(box[2] - box[0]), box[3] - box[1]]
+        s = max(box_size) / 2 * expand_ratio
+        new_box = [box_center[1] - s, box_center[0] - s, box_center[1] + s,  box_center[0] + s]
+        crop = im_pil.crop(new_box).resize((target_size, target_size), resample=Image.BILINEAR)
+        crops[i] = np.array(crop)
+    return crops
 
 
 def main():
