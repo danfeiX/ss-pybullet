@@ -103,6 +103,11 @@ class Camera(object):
         depth_map = get_depth_map(depth, near=self._near, far=self._far)
         return rgb[:, :, :3].astype(np.uint8), depth_map, obj_idmap, link_idmap
 
+    def get_crops(self, object_ids, expand_ratio=1.1):
+        rgb, depth, obj_seg, link_seg = self.capture_frame()
+        bbox = get_bbox2d_from_segmentation(obj_seg, object_ids)
+        return crop_pad_resize(rgb, bbox[:, 1:], 24, expand_ratio=expand_ratio)
+
 
 def get_bbox2d_from_mask(bmask):
     """
