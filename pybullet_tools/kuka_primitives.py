@@ -209,9 +209,9 @@ def get_grasp_gen(robot, grasp_name):
     return gen
 
 
-def get_stable_gen(fixed=[], bottom_percent=0.0): # TODO: continuous set of grasps
+def get_stable_gen(fixed=[], bottom_percent=0.0, max_attempt=100): # TODO: continuous set of grasps
     def gen(body, surface):
-        while True:
+        for _ in range(max_attempt):
             obstacles = [f for f in fixed if f != body]
             # pose = center_placement(body, surface, bottom_percent=bottom_percent)
             pose = sample_center_placement(body, surface, obstacles)
