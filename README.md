@@ -1,4 +1,5 @@
 # ss-pybullet
+This is a direct fork of https://github.com/caelan/ss-pybullet
 STRIPStream + pybullet
 
 <!--![Alt text](images/test.png?raw=true "Title")-->
